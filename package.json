@@ -1,6 +1,6 @@
 {
   "name": "middleware-flow",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Middleware control flow library: series, parallel, or, and",
   "main": "index.js",
   "directories": {
