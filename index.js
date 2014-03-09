@@ -59,6 +59,9 @@ var flow = module.exports = {
         }
       }
     };
+  },
+  next: function (req, res, next) {
+    next();
   }
 };
 flow.and = flow.series;
