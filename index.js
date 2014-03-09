@@ -62,6 +62,74 @@ var flow = module.exports = {
   },
   next: function (req, res, next) {
     next();
+  },
+  _execConditional: function (conditional) {
+    return function (req, res, next) {
+      if (conditional.type === 'middleware') {
+        conditional.if(req, res, function (err) {
+          async(err, !err);
+        });
+      }
+      else if (conditional.type === 'async') {
+        conditional.if(req, res, async);
+      }
+      else if (conditional.type === 'sync') {
+        sync(conditional.if(req, res));
+      }
+      else if (conditional.type === 'value') {
+        sync(conditional.if);
+      }
+      else {
+        throw new Error('unknown conditional type');
+      }
+      function sync (result) {
+        if (result) {
+          flow.series.apply(null, conditional.then)(req, res, next);
+        }
+        else {
+          flow.series.apply(null, conditional.else)(req, res, next);
+        }
+      }
+      function async (err, result) {
+        if (err || !result) {
+          flow.series.apply(null, conditional.else)(req, res, next);
+        }
+        else {
+          flow.series.apply(null, conditional.then)(req, res, next);
+        }
+      }
+    };
+  },
+  conditional: function (type, test) {
+    var conditional = {
+      type: type,
+      if: test
+    };
+    return thenAndElse(this._execConditional(conditional), conditional);
+  },
+  mwIf: function (mw) {
+    return this.conditional('middleware', mw);
+  },
+  syncIf: function (mw) {
+    return this.conditional('sync', mw);
+  },
+  asyncIf: function (mw) {
+    return this.conditional('async', mw);
+  },
+  if: function (val) {
+    return this.conditional('value', val);
   }
 };
 flow.and = flow.series;
+
+function thenAndElse (exec, conditional) {
+  exec.then = function (/* middlewares */) {
+    conditional.then = Array.prototype.slice.call(arguments);
+    return exec;
+  };
+  exec.else = function (/* middlewares */) {
+    conditional.else = Array.prototype.slice.call(arguments);
+    return exec;
+  };
+  return exec;
+}
