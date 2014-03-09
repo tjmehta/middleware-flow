@@ -5,8 +5,7 @@ var flow = module.exports = {
     var args = Array.prototype.slice.call(arguments);
     return function (req, res, next) {
       var middlewares = args.slice(); // copy
-
-      step(middlewares.unshift());
+      step(middlewares.shift());
       function step (mw) {
         if (mw) {
           mw(req, res, nextStep);
@@ -17,7 +16,7 @@ var flow = module.exports = {
       }
       function nextStep (err) {
         if (err) return next(err);
-        step(middlewares.unshift()); // continue
+        step(middlewares.shift()); // continue
       }
     };
   },
@@ -27,8 +26,11 @@ var flow = module.exports = {
       var count = createCount(next);
       var middlewares = args.slice(); // copy
 
+      middlewares.forEach(function () {
+        count.inc(); // inc first just in case the middlewares are sync
+      });
       middlewares.forEach(function (mw) {
-        mw(req, res, count.inc().next);
+        mw(req, res, count.next);
       });
     };
   },
@@ -38,24 +40,25 @@ var flow = module.exports = {
       var middlewares = args.slice(); // copy
       var firstErr;
 
-      step(middlewares.unshift());
+      step(middlewares.shift());
       function step (mw) {
         if (mw) {
           mw(req, res, nextStep);
         }
         else {
-          next(firstErr); // done w/ err
+          next(firstErr); // done w/ err or no mw
         }
       }
       function nextStep (err) {
         if (err) {
           firstErr = firstErr || err;
-          step(middlewares.unshift()); // continue
+          step(middlewares.shift()); // continue
         }
         else {
           next(); // done
         }
       }
     };
-  },
+  }
 };
+flow.and = flow.series;
