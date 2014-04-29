@@ -6,16 +6,25 @@ var flow = module.exports = {
     return function (req, res, next) {
       var middlewares = args.slice(); // copy
       step(middlewares.shift());
+      var error;
       function step (mw) {
         if (mw) {
-          mw(req, res, nextStep);
+          if (error) {
+            mw(error, req, res, nextStep);
+          }
+          else {
+            mw(req, res, nextStep);
+          }
         }
         else {
-          next(); // done
+          next(error); // done
         }
       }
       function nextStep (err) {
-        if (err) return next(err);
+        if (err) {
+          error = err;
+          middlewares = middlewares.filter(lengthOf(4));
+        }
         step(middlewares.shift()); // continue
       }
     };
@@ -92,6 +101,9 @@ var flow = module.exports = {
       }
       function async (err, result) {
         if (err || !result) {
+          if (exists(err)) {
+            req.lastError = err;
+          }
           flow.series.apply(null, conditional.else)(req, res, next);
         }
         else {
@@ -132,4 +144,14 @@ function thenAndElse (exec, conditional) {
     return exec;
   };
   return exec;
+}
+
+function exists (v) {
+  return v !== null && v !== undefined;
+}
+
+function lengthOf (i) {
+  return function (foo) {
+    return foo.length === i;
+  };
 }

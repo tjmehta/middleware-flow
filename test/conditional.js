@@ -74,7 +74,15 @@ function conditionalFail (method, test, pass) {
             appendReqBody('key', '2'),
             appendReqBody('key', '3')
           )
-          .else(nextError(err))
+          .else(nextError(err)),
+        function (err, req, res, next) {
+          if (test === mwFailErr || test === asyncFail) {
+            if (!req.lastError) {
+              throw new Error('lastError was not set');
+            }
+          }
+          next();
+        }
       );
     });
     it('should run middlewares in else if it doesnt pass', function (done) {
