@@ -61,7 +61,7 @@ var app = require('express')();
 
 app.use(
   syncIf(nameQueryExists)   // accepts a sync function that returns a boolean
-    .then(one, two, three)  // true -> then, false -> else
+    .then(one, two, three)  // true -> then, error -> skips all next(err)
     .else(error)
 );
 function nameQueryExists (req, res) {
@@ -82,7 +82,7 @@ var app = require('express')();
 
 app.use(
   asyncIf(bodyFileExists)    // expects boolean as the result argument
-    .then(one, two, three)   // true -> then, false -> else, error -> else
+    .then(one, two, three)   // true -> then, false -> else, error -> skips all next(err)
     .else(other)
 );
 function logExists (req, res, cb) {
@@ -102,7 +102,8 @@ var app = require('express')();
 app.use(
   mwIf(userIsModerator)    // error here, just runs the else middlewares
     .then(one, two, three) // no error -> then, error -> else
-    .else(other)
+    .else(other)           // if other is an error middleware it will recieve
+                           // the error else the error will be ignored
 );
 function userIsModerator (req, res, next) {
   if (!req.user.isModerator) {

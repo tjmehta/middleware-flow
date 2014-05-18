@@ -14,52 +14,39 @@ var nextErr = errMw.nextErr;
 
 var createAppWithMiddleware = require('./fixtures/createAppWithMiddleware');
 var flow = require('../index');
-var mwIf = flow.mwIf;
+var asyncIf = flow.asyncIf;
 
-describe('mwIf', function() {
-  it('should run middleware passed to then if the mw passes', function(done) {
+describe('asyncIf', function() {
+  it('should run middleware passed to then if the function callbacks true', function(done) {
     var app = createAppWithMiddleware(
-      mwIf(flow.next)
-        .then(res.write('1'))
-        .else(res.write('2')),
+      asyncIf(callbackTrue)
+        .then(res.write('A'))
+        .else(res.write('B')),
       res.end()
     );
     request(app)
       .get('/')
-      .expect('1')
+      .expect('A')
       .end(done);
   });
-  it('should run middleware passed to else if the mw next(err) (and pass error if accepted)', function(done) {
-    var err = new Error('boom');
+  it('should run middleware passed to then if the function callbacks false', function(done) {
     var app = createAppWithMiddleware(
-      mwIf(nextErr(err))
-        .then(res.write('1'))
-        .else(res.sendErr()),
+      asyncIf(callbackFalse)
+        .then(res.write('A'))
+        .else(res.write('B')),
       res.end()
     );
     request(app)
       .get('/')
-      .expect(err.message)
+      .expect('B')
       .end(done);
   });
-  it('should run middleware passed to else if the mw next(err) (and not pass error if not-accepted)', function(done) {
+  it('should next(err) if the mw next(err)', function(done) {
     var err = new Error('boom');
     var app = createAppWithMiddleware(
-      mwIf(nextErr(err))
-        .then(res.write('1'))
-        .else(res.write('2')),
-      res.end()
-    );
-    request(app)
-      .get('/')
-      .expect('2')
-      .end(done);
-  });
-  it('should run middleware passed to else if the mw next(err) (and not pass error if not-accepted)', function(done) {
-    var err = new Error('boom');
-    var app = createAppWithMiddleware(
-      mwIf(nextErr(err))
-        .then(res.write('1')),
+      asyncIf(nextErr(err))
+        .then(res.send('1'))
+        .else(res.send('2')),
       res.sendErr()
     );
     request(app)
@@ -70,11 +57,9 @@ describe('mwIf', function() {
   it('should next(err) if the mw has uncaught exception', function(done) {
     var err = new Error('boom');
     var app = createAppWithMiddleware(
-      mwIf(throwErr(err))
-        .then(res.write('1'))
-        .else(
-          res.write('2'),
-          res.end()),
+      asyncIf(throwErr(err))
+        .then(res.send('1'))
+        .else(res.send('2')),
       res.sendErr()
     );
     request(app)
@@ -83,3 +68,11 @@ describe('mwIf', function() {
       .end(done);
   });
 });
+
+function callbackTrue (req, res, next) {
+  next(null, true);
+}
+
+function callbackFalse (req, res, next) {
+  next(null, false);
+}

@@ -9,22 +9,24 @@ var flow = module.exports = {
   },
   _execConditional: function (conditional) {
     return function (req, res, next) {
-      if (conditional.type === 'middleware') {
-        conditional.if(req, res, function (err) {
-          async(err, !err);
-        });
+      try {
+        if (conditional.type === 'middleware') {
+          conditional.if(req, res, function (err) {
+            async(err, !err);
+          });
+        }
+        else if (conditional.type === 'async') {
+          conditional.if(req, res, async);
+        }
+        else if (conditional.type === 'sync') {
+          sync(conditional.if(req, res));
+        }
+        else { //if (conditional.type === 'value') {
+          sync(conditional.if);
+        }
       }
-      else if (conditional.type === 'async') {
-        conditional.if(req, res, async);
-      }
-      else if (conditional.type === 'sync') {
-        sync(conditional.if(req, res));
-      }
-      else if (conditional.type === 'value') {
-        sync(conditional.if);
-      }
-      else {
-        throw new Error('unknown conditional type');
+      catch (err) {
+        async(err, !err, true);
       }
       function sync (result) {
         if (result) {
@@ -34,20 +36,23 @@ var flow = module.exports = {
           flow.series.apply(null, conditional.else)(req, res, next);
         }
       }
-      function async (err, result) {
-        if (err || !result) {
-          if (exists(err)) {
-            req.lastError = err;
+      function async (err, result, uncaught) {
+        if (err) {
+          if (uncaught || conditional.type !== 'middleware' || !conditional.else || !conditional.else[0]) {
+            next(err);
           }
-          flow.series.apply(null, conditional.else)(req, res, next);
+          else { // if (conditional.type === 'middleware') {
+            if (conditional.else[0].length === 4) {
+              conditional.else[0] = conditional.else[0].bind(null, err);
+            }
+            flow.series.apply(null, conditional.else)(req, res, next);
+          }
+        }
+        else if (result) {
+          flow.series.apply(null, conditional.then)(req, res, next);
         }
         else {
-          // TODO
-          // if (err && conditional.then[0] && conditional.then[0].length === 4) {
-          //   console.log('fjdksl;afjksdla;fsda');
-          //   conditional.then[0] = conditional.then[0].bind(null, err);
-          // }
-          flow.series.apply(null, conditional.then)(req, res, next);
+          flow.series.apply(null, conditional.else)(req, res, next);
         }
       }
     };
@@ -84,14 +89,4 @@ function thenAndElse (exec, conditional) {
     return exec;
   };
   return exec;
-}
-
-function exists (v) {
-  return v !== null && v !== undefined;
-}
-
-function lengthOf (i) {
-  return function (foo) {
-    return foo.length === i;
-  };
 }
