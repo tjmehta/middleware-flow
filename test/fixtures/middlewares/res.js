@@ -19,5 +19,10 @@ var res = module.exports = {
     return function (err, req, res, next) {
       res.send(err.message);
     };
+  },
+  sendQuery: function () {
+    return function (req, res, next) {
+      res.json(req.query);
+    };
   }
 };

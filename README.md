@@ -92,18 +92,17 @@ function logExists (req, res, cb) {
 }
 ```
 
-## mwIf(middleware).then(middlewares...).else(middlewares...)
+## mwIf(middleware).then(middlewares..).else(middlewares..)
 
 ```js
 var mwIf = require('middleware-flow').mwIf;
-var or = require('middleware-flow').or;
 var app = require('express')();
 
 app.use(
   mwIf(userIsModerator)    // error here, just runs the else middlewares
     .then(one, two, three) // no error -> then, error -> else
     .else(other)           // if other is an error middleware it will recieve
-                           // the error else the error will be ignored
+                           //   the error else the error will be ignored
 );
 function userIsModerator (req, res, next) {
   if (!req.user.isModerator) {
@@ -112,6 +111,23 @@ function userIsModerator (req, res, next) {
   else {
     next();
   }
+}
+```
+
+## try(middlewares..).catch(middlewares..)
+
+```js
+var flow = require('middleware-flow');
+var app = require('express')();
+
+app.use(
+  flow.try(saveUser) // error here, just runs the catch middlewares
+    .catch(rollback) // no error -> other, error -> rollback
+                     // if rollback is an error middleware it will recieve
+                     //   the error else the error will be ignored
+);
+function saveUser (req, res, next) {
+  db.save(req.user, next);
 }
 ```
 

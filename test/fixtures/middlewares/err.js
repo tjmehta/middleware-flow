@@ -20,5 +20,11 @@ module.exports = {
     return function (err, req, res, next) {
       next();
     };
+  },
+  extendErrMessage: function (ext) {
+    return function (err, req, res, next) {
+      err.message = err.message+ext;
+      next(err);
+    };
   }
 };

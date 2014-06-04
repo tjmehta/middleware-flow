@@ -36,6 +36,7 @@ describe('series', function () {
     var err = new Error('boom');
     var app = createAppWithMiddleware(
       series(
+        wrapAcceptErr(res.write('NO')),
         nextErr(err),
         res.write('1'),
         res.write('2'),
