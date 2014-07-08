@@ -41,6 +41,18 @@ describe('asyncIf', function() {
       .expect('B')
       .end(done);
   });
+  it('should run middleware passed to then if the function callbacks false', function(done) {
+    var app = createAppWithMiddleware(
+      asyncIf(callbackFalse)
+        .then(res.write('A')),
+      res.write('B'),
+      res.end()
+    );
+    request(app)
+      .get('/')
+      .expect('B')
+      .end(done);
+  });
   it('should next(err) if the mw next(err)', function(done) {
     var err = new Error('boom');
     var app = createAppWithMiddleware(
