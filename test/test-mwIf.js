@@ -55,16 +55,29 @@ describe('mwIf', function() {
       .expect('2')
       .end(done);
   });
-  it('should run middleware passed to else if the mw next(err) (and not pass error if not-accepted)', function(done) {
+  it('should run middleware passed to else if the mw next(err) (and pass error if accepted)', function(done) {
     var err = new Error('boom');
     var app = createAppWithMiddleware(
       mwIf(nextErr(err))
-        .then(res.write('1')),
-      res.sendErr()
+        .then(res.write('1'))
+        .else(res.sendErr())
     );
     request(app)
       .get('/')
       .expect(err.message)
+      .end(done);
+  });
+  it('should run middleware passed to else if the mw next(err) (and pass error if accepted)', function(done) {
+    var err = new Error('boom');
+    var app = createAppWithMiddleware(
+      mwIf(nextErr(err))
+        .then(res.write('1')),
+      res.sendErr(), // skip me
+      res.send('skip success')
+    );
+    request(app)
+      .get('/')
+      .expect('skip success')
       .end(done);
   });
   it('should next(err) if the mw has uncaught exception', function(done) {

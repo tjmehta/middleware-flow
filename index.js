@@ -38,21 +38,27 @@ flow._execConditional = function (conditional) {
     }
     function async (err, result, uncaught) {
       if (err) {
-        if (uncaught || conditional.type !== 'middleware' || !conditional.else || !conditional.else[0]) {
+        if (uncaught || conditional.type !== 'middleware') {
           next(err);
         }
         else { // if (conditional.type === 'middleware') {
-          if (conditional.else[0].length === 4) {
-            conditional.else[0] = conditional.else[0].bind(null, err);
+          if (conditional.else && conditional.else[0]) {
+            if (conditional.else[0].length === 4) {
+              conditional.else[0] = conditional.else[0].bind(null, err);
+            }
+            flow.series.apply(null, conditional.else)(req, res, next);
+          } else {
+            next();
           }
-          flow.series.apply(null, conditional.else)(req, res, next);
         }
       }
       else if (result) {
         flow.series.apply(null, conditional.then)(req, res, next);
       }
-      else {
+      else if (conditional.else && conditional.else[0]) {
         flow.series.apply(null, conditional.else)(req, res, next);
+      } else {
+        next();
       }
     }
   };
