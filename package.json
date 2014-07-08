@@ -15,6 +15,9 @@
     "url": "https://github.com/tjmehta/middleware-flow.git"
   },
   "author": "Tejesh Mehta",
+  "contributors": [
+    "Bryan Kendall <bryan@bryankendall.com>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/tjmehta/middleware-flow/issues"
