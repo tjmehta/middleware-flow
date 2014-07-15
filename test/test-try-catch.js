@@ -94,4 +94,39 @@ describe('try', function() {
       done();
     }
   });
+  it('should pass error to first mw catch', function (done) {
+      var app = createAppWithMiddleware(
+        flow
+          .try(nextErr(new Error('boom')))
+          .catch(
+          function(err, req, res, next) {
+            res.send('caught');
+          }
+        ),
+        res.send('nocaught')
+      );
+      request(app)
+        .get('/')
+        .expect('caught')
+        .end(done);
+    });
+  it('should pass error to first mw catch', function (done) {
+    var app = createAppWithMiddleware(
+      flow
+        .try(
+          flow.next,
+          nextErr(new Error('boom'))
+        )
+        .catch(
+        function(err, req, res, next) {
+          res.send('caught');
+        }
+      ),
+      res.send('nocaught')
+    );
+    request(app)
+      .get('/')
+      .expect('caught')
+      .end(done);
+  });
 });
