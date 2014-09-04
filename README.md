@@ -27,6 +27,27 @@ var app = require('express')();
 app.use(parallel(mw1, mw2, mw2)); // if err, returns the first error that occurred
 ```
 
+## each
+```js
+var each = require('middleware-flow').each;
+var arr = [1,2,3];
+var app = require('express')();
+                                  // runs the middlewares in 'parallel'
+app.use(
+  each(arr,
+    // runs the middlewares in parallel
+    function (eachReq, res, next) {
+      // eachReq is a scoped req for the each function that reads from req,
+      // but writes to it's own scope (prototypically inherits from request)
+    },
+    function (item, req, eachReq, res, next) {
+      // if middleware accepts five arguments, the current item and the original req are passed
+      // eachReq is a scoped req for the each function that reads from req,
+      // but writes to it's own scope (prototypically inherits from request)
+    })
+); // if err, returns the first error that occurred
+```
+
 ## or(middlewares...)
 
 ```js

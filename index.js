@@ -4,6 +4,7 @@ var flow = module.exports = {};
 flow.series = require('./lib/series');
 flow.parallel = require('./lib/parallel');
 flow.or = require('./lib/or');
+flow.each = require('./lib/each');
 flow.next = function (req, res, next) {
   next();
 };
