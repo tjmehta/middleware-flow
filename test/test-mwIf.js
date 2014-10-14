@@ -95,4 +95,26 @@ describe('mwIf', function() {
       .expect(err.message)
       .end(done);
   });
+  it('should run middleware passed to else if the mw next(err) (and pass correct error message - shared scope test)', function(done) {
+    var app = createAppWithMiddleware(
+      mwIf(function (req, res, next) {
+          next(new Error(req.body.message));
+        })
+        .then(res.send('skip success'))
+        .else(function (err, req, res, next) {
+          res.send(err.message);
+        })
+    );
+    var count = createCount(done);
+    request(app)
+      .post('/')
+      .send({message:'one'})
+      .expect('one')
+      .end(count.inc().next);
+    request(app)
+      .post('/')
+      .send({message:'two'})
+      .expect('two')
+      .end(count.inc().next);
+  });
 });
