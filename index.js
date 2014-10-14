@@ -45,9 +45,13 @@ flow._execConditional = function (conditional) {
         else { // if (conditional.type === 'middleware') {
           if (conditional.else && conditional.else[0]) {
             if (conditional.else[0].length === 4) {
-              conditional.else[0] = conditional.else[0].bind(null, err);
+              var newElse = conditional.else.slice(); // shallow clone
+              newElse[0] = newElse[0].bind(null, err);
+              flow.series.apply(null, newElse)(req, res, next);
             }
-            flow.series.apply(null, conditional.else)(req, res, next);
+            else {
+              flow.series.apply(null, conditional.else)(req, res, next);
+            }
           } else {
             next();
           }

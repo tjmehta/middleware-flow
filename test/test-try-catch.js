@@ -14,6 +14,7 @@ var log = require('./fixtures/middlewares/log');
 var throwErr = errMw.throwErr;
 var nextErr = errMw.nextErr;
 var extendErrMessage = errMw.extendErrMessage;
+var createCount = require('callback-count');
 
 var createAppWithMiddleware = require('./fixtures/createAppWithMiddleware');
 var flow = require('../index');
@@ -109,7 +110,7 @@ describe('try', function() {
         .get('/')
         .expect('caught')
         .end(done);
-    });
+  });
   it('should pass error to first mw catch', function (done) {
     var app = createAppWithMiddleware(
       flow
@@ -128,5 +129,37 @@ describe('try', function() {
       .get('/')
       .expect('caught')
       .end(done);
+  });
+  it('should pass error to first mw catch (and pass correct error message - shared scope test)', function (done) {
+    var app = createAppWithMiddleware(
+      flow.each([1],
+        flow
+          .try(
+            function (eachReq, res, next) {
+              var err = new Error(eachReq.body.message);
+              next(err); // next the error
+            }
+          )
+          .catch(
+            function(err, eachReq, res, next) {
+              res.send(err.message);
+            }
+          )),
+        res.send('nocaught')
+    );
+    var countZ = createCount(done);
+    var num;
+    num = 100;
+    request(app)
+      .post('/')
+      .send({ message: 'foo' })
+      .expect('foo')
+      .end(countZ.inc().next);
+    num = 90;
+    request(app)
+      .post('/')
+      .send({ message: 'bar' })
+      .expect('bar')
+      .end(countZ.inc().next);
   });
 });

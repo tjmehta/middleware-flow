@@ -5,6 +5,7 @@ module.exports = function createAppWithMiddlewares (/* middlewares */) {
   var middlewares = Array.prototype.slice.call(arguments);
   var app = express();
   middlewares.forEach(function (mw) {
+    app.use(express.bodyParser());
     app.use(mw);
   });
   return app;
