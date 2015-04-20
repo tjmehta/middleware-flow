@@ -1,4 +1,5 @@
 var createCount = require('callback-count');
+var noop = require('101/noop');
 
 var flow = module.exports = {};
 flow.series = require('./lib/series');
@@ -89,6 +90,13 @@ flow.if = function (val) {
 };
 flow.and = flow.series;
 flow.try = require('./lib/try-catch')(flow.mwIf);
+flow.bg = flow.background = function (/* middlewares */) {
+  var mw = flow.series.apply(flow, arguments);
+  return function (req, res, next) {
+    mw(req, res, noop);
+    next();
+  };
+};
 
 function thenAndElse (exec, conditional) {
   exec.then = function (/* middlewares */) {
