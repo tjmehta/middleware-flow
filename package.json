@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/tjmehta/middleware-flow",
   "dependencies": {
-    "101": "^0.6.0",
+    "101": "^0.16.1",
     "callback-count": "0.0.3"
   },
   "devDependencies": {

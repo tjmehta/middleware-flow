@@ -152,5 +152,14 @@ function saveUser (req, res, next) {
 }
 ```
 
+## bg(middlewares...)
+
+```js
+app.use(
+  flow.bg(mw1, mw2, mw2)
+); // runs the middlewares in series in the background
+
+```
+
 # License
 ### MIT
