@@ -1,10 +1,11 @@
 var Lab = require('lab');
+var lab = exports.lab = Lab.script();
 
-var describe = Lab.experiment;
-var it = Lab.test;
-var expect = Lab.expect;
-var before = Lab.before;
-var after = Lab.after;
+var describe = lab.experiment;
+var it = lab.test;
+var expect = require('code').expect;
+var before = lab.before;
+var after = lab.after;
 var request = require('supertest');
 var res = require ('./fixtures/middlewares/res');
 var errMw = require('./fixtures/middlewares/err');
@@ -60,7 +61,7 @@ describe('series', function () {
 
     function expectErr (err) {
       return function (e, req, res, next) {
-        expect(e).to.eql(err);
+        expect(e).to.equal(err);
         next(e);
       };
     }
@@ -92,7 +93,7 @@ describe('series', function () {
 
     function expectErr (err) {
       return function (e, req, res, next) {
-        expect(e).to.eql(err);
+        expect(e).to.equal(err);
         next(e);
       };
     }
@@ -126,7 +127,7 @@ describe('series', function () {
 
     function expectErr (err) {
       return function (e, req, res, next) {
-        expect(e).to.eql(err);
+        expect(e).to.equal(err);
         next(e);
       };
     }
@@ -187,7 +188,7 @@ describe('and', function () {
 
     function expectErr (err) {
       return function (e, req, res, next) {
-        expect(e).to.eql(err);
+        expect(e).to.equal(err);
         next(e);
       };
     }
@@ -219,7 +220,7 @@ describe('and', function () {
 
     function expectErr (err) {
       return function (e, req, res, next) {
-        expect(e).to.eql(err);
+        expect(e).to.equal(err);
         next(e);
       };
     }
@@ -253,7 +254,7 @@ describe('and', function () {
 
     function expectErr (err) {
       return function (e, req, res, next) {
-        expect(e).to.eql(err);
+        expect(e).to.equal(err);
         next(e);
       };
     }
