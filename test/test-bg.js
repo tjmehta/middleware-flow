@@ -15,6 +15,7 @@ var wrapAcceptErr = errMw.wrapAcceptErr;
 
 var createAppWithMiddleware = require('./fixtures/createAppWithMiddleware');
 var flow = require('../index');
+var series = require('../index').series;
 var createCount = require('callback-count');
 
 describe('background', function () {
@@ -23,24 +24,22 @@ describe('background', function () {
       flow.bg(
         function (req, res, next) {
           var resEnd = res.end.bind(res);
-          res.end(function () {
+          res.end = function () {
             setTimeout(function () {
               thisShouldBeCalledAfterRouteComplete();
               next(); // this should do nothing
             }, 10);
             resEnd();
-          });
+          };
+          next();
         }
       ),
-      res.write('1'),
-      res.write('2'),
-      res.write('3'),
-      res.end()
+      res.send(1)
     );
     var count = createCount(2, done);
     request(app)
       .get('/')
-      .expect('123')
+      .expect('1')
       .end(function () {
         expect(count.count).to.equal(2); // called first
         count.next();
