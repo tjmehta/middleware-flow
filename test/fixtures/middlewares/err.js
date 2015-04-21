@@ -1,6 +1,6 @@
 module.exports = {
   throwErr: function (err) {
-    return function (req, res, next) {
+    return function () {
       throw err;
     };
   },
@@ -17,13 +17,13 @@ module.exports = {
     };
   },
   ignoreErr: function () {
-    return function (err, req, res, next) {
+    return function (err, req, res, next) { // eslint-disable-line handle-callback-err,no-unused-vars
       next();
     };
   },
   extendErrMessage: function (ext) {
     return function (err, req, res, next) {
-      err.message = err.message+ext;
+      err.message = err.message + ext;
       next(err);
     };
   }

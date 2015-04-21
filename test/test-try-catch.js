@@ -5,22 +5,17 @@ var lab = exports.lab = Lab.script();
 var describe = lab.experiment;
 var it = lab.test;
 var expect = require('code').expect;
-var before = lab.before;
-var after = lab.after;
 var request = require('supertest');
-var res = require ('./fixtures/middlewares/res');
+var res = require('./fixtures/middlewares/res');
 var errMw = require('./fixtures/middlewares/err');
 var query = require('./fixtures/middlewares/query');
-var log = require('./fixtures/middlewares/log');
-var throwErr = errMw.throwErr;
 var nextErr = errMw.nextErr;
 var extendErrMessage = errMw.extendErrMessage;
-var createCount = require('callback-count');
 
 var createAppWithMiddleware = require('./fixtures/createAppWithMiddleware');
 var flow = require('../index');
 
-describe('try', function() {
+describe('try', function () {
   it('should skip catch middlewares if the try middlewares pass', function (done) {
     var app = createAppWithMiddleware(
       flow
@@ -47,7 +42,7 @@ describe('try', function() {
     );
     request(app)
       .get('/')
-      .expect({foo:'bar'})
+      .expect({ foo: 'bar' })
       .end(done);
   });
   it('should run the catch middlewares (err mws) if the try middlewares error', function (done) {
@@ -77,14 +72,14 @@ describe('try', function() {
     );
     request(app)
       .get('/')
-      .expect({foo:{}})
+      .expect({ foo: {} })
       .end(done);
   });
   it('should throw an error if try is given error middlewares', function (done) {
     try {
-      var app = createAppWithMiddleware(
+      createAppWithMiddleware(
         flow
-          .try(function (err, req, res, next) { next(); })
+          .try(function (err, req, res, next) { next(); }) // eslint-disable-line handle-callback-err
           .catch(
             res.send('caught')
           ),
@@ -97,20 +92,19 @@ describe('try', function() {
     }
   });
   it('should pass error to first mw catch', function (done) {
-      var app = createAppWithMiddleware(
-        flow
-          .try(nextErr(new Error('boom')))
-          .catch(
-          function(err, req, res, next) {
-            res.send('caught');
-          }
-        ),
-        res.send('nocaught')
-      );
-      request(app)
-        .get('/')
-        .expect('caught')
-        .end(done);
+    var app = createAppWithMiddleware(
+      flow
+        .try(nextErr(new Error('boom')))
+        .catch(function (err, req, res, next) { // eslint-disable-line handle-callback-err,no-unused-vars
+          res.send('caught');
+        }
+      ),
+      res.send('nocaught')
+    );
+    request(app)
+      .get('/')
+      .expect('caught')
+      .end(done);
   });
   it('should pass error to first mw catch', function (done) {
     var app = createAppWithMiddleware(
@@ -120,10 +114,10 @@ describe('try', function() {
           nextErr(new Error('boom'))
         )
         .catch(
-        function(err, req, res, next) {
-          res.send('caught');
-        }
-      ),
+          function (err, req, res, next) { // eslint-disable-line handle-callback-err,no-unused-vars
+            res.send('caught');
+          }
+        ),
       res.send('nocaught')
     );
     request(app)
@@ -142,21 +136,19 @@ describe('try', function() {
             }
           )
           .catch(
-            function(err, eachReq, res, next) {
+            function (err, eachReq, res, next) { // eslint-disable-line no-unused-vars
               res.send(err.message);
             }
-          )),
+          )
+        ),
         res.send('nocaught')
     );
     var countZ = createCount(done);
-    var num;
-    num = 100;
     request(app)
       .post('/')
       .send({ message: 'foo' })
       .expect('foo')
       .end(countZ.inc().next);
-    num = 90;
     request(app)
       .post('/')
       .send({ message: 'bar' })
