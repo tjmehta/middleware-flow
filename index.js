@@ -4,6 +4,7 @@ var noop = require('101/noop');
 var flow = module.exports = {};
 flow.series = require('./lib/series');
 flow.parallel = require('./lib/parallel');
+flow.parallelWait = require('./lib/parallel-wait');
 flow.or = require('./lib/or');
 flow.each = require('./lib/each');
 flow.next = function (req, res, next) {
