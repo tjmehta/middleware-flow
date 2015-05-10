@@ -1,24 +1,19 @@
-var createCount = require('callback-count');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 
 var describe = lab.experiment;
 var it = lab.test;
-var expect = require('code').expect;
-var before = lab.before;
-var after = lab.after;
 var request = require('supertest');
-var res = require ('./fixtures/middlewares/res');
+var res = require('./fixtures/middlewares/res');
 var errMw = require('./fixtures/middlewares/err');
 var throwErr = errMw.throwErr;
-var nextErr = errMw.nextErr;
 
 var createAppWithMiddleware = require('./fixtures/createAppWithMiddleware');
 var flow = require('../index');
 var syncIf = flow.syncIf;
 
-describe('syncIf', function() {
-  it('should run middleware passed to then if the function returns true', function(done) {
+describe('syncIf', function () {
+  it('should run middleware passed to then if the function returns true', function (done) {
     var app = createAppWithMiddleware(
       syncIf(returnTrue)
         .then(res.write('1'))
@@ -30,7 +25,7 @@ describe('syncIf', function() {
       .expect('1')
       .end(done);
   });
-  it('should run middleware passed to then if the function returns true', function(done) {
+  it('should run middleware passed to then if the function returns true', function (done) {
     var app = createAppWithMiddleware(
       syncIf(returnFalse)
         .then(res.write('1'))
@@ -42,7 +37,7 @@ describe('syncIf', function() {
       .expect('2')
       .end(done);
   });
-  it('should run middleware passed to else if function has an uncaught error', function(done) {
+  it('should run middleware passed to else if function has an uncaught error', function (done) {
     var err = new Error('boom');
     var app = createAppWithMiddleware(
       syncIf(throwErr(err))
@@ -58,9 +53,9 @@ describe('syncIf', function() {
   });
 });
 
-function returnTrue (req, res, next) {
+function returnTrue (req, res, next) { // eslint-disable-line no-unused-vars
   return true;
 }
-function returnFalse (req, res, next) {
+function returnFalse (req, res, next) { // eslint-disable-line no-unused-vars
   return false;
 }

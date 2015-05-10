@@ -1,10 +1,10 @@
 var express = require('express');
-var mw = require('../../index');
+var bodyParser = require('body-parser');
 
 module.exports = function createAppWithMiddlewares (/* middlewares */) {
   var middlewares = Array.prototype.slice.call(arguments);
   var app = express();
-  app.use(express.bodyParser());
+  app.use(bodyParser.json());
   middlewares.forEach(function (mw) {
     app.use(mw);
   });

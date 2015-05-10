@@ -1,4 +1,3 @@
-var createCount = require('callback-count');
 var noop = require('101/noop');
 
 var flow = module.exports = {};
@@ -24,7 +23,7 @@ flow._execConditional = function (conditional) {
       else if (conditional.type === 'sync') {
         sync(conditional.if(req, res));
       }
-      else { //if (conditional.type === 'value') {
+      else { // if (conditional.type === 'value') {
         sync(conditional.if);
       }
     }
@@ -54,7 +53,8 @@ flow._execConditional = function (conditional) {
             else {
               flow.series.apply(null, conditional.else)(req, res, next);
             }
-          } else {
+          }
+          else {
             next();
           }
         }
@@ -64,14 +64,15 @@ flow._execConditional = function (conditional) {
       }
       else if (conditional.else && conditional.else[0]) {
         flow.series.apply(null, conditional.else)(req, res, next);
-      } else {
+      }
+      else {
         next();
       }
     }
   };
 };
 flow.conditional = function (type, test) {
-  var conditional = {
+  var conditional = { // eslint-disable-line no-reserved-keys
     type: type,
     if: test
   };
