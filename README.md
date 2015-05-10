@@ -27,6 +27,15 @@ var app = require('express')();
 app.use(parallel(mw1, mw2, mw2)); // if err, returns the first error that occurred
 ```
 
+## parallelWait(middlewares...)
+
+```js
+var parallelWait = require('middleware-flow').parallelWait;
+var app = require('express')();
+                                  // runs the middlewares in 'parallel' and waits for all of them before to return also in case of err
+app.use(parallelWait(mw1, mw2, mw2)); // if err, returns the first error that occurred
+```
+
 ## each
 ```js
 var each = require('middleware-flow').each;
